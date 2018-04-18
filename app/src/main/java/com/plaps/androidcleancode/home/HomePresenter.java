@@ -24,7 +24,7 @@ public class HomePresenter {
     public void getCityList() {
         view.showWait();
 
-        Subscription subscription = service.getCityList(new Service.GetCityListCallback() {
+        service.getCityList(new Service.GetCityListCallback() {
             @Override
             public void onSuccess(CityListResponse cityListResponse) {
                 view.removeWait();
@@ -36,10 +36,7 @@ public class HomePresenter {
                 view.removeWait();
                 view.onFailure(networkError.getAppErrorMessage());
             }
-
         });
-
-        subscriptions.add(subscription);
     }
     public void onStop() {
         subscriptions.unsubscribe();

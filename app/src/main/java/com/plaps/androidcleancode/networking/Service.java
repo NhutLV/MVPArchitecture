@@ -3,12 +3,10 @@ package com.plaps.androidcleancode.networking;
 
 import com.plaps.androidcleancode.models.CityListResponse;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by ennur on 6/25/16.
@@ -20,38 +18,29 @@ public class Service {
         this.networkService = networkService;
     }
 
-    public Subscription getCityList(final GetCityListCallback callback) {
+    public void getCityList(final GetCityListCallback callback) {
 
-        return networkService.getCityList()
-                .subscribeOn(Schedulers.io())
+        networkService.getCityList().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .onErrorResumeNext(new Func1<Throwable, Observable<? extends CityListResponse>>() {
+                .subscribe(new SingleObserver<CityListResponse>() {
                     @Override
-                    public Observable<? extends CityListResponse> call(Throwable throwable) {
-                        return Observable.error(throwable);
-                    }
-                })
-                .subscribe(new Subscriber<CityListResponse>() {
-                    @Override
-                    public void onCompleted() {
+                    public void onSubscribe(Disposable d) {
 
+                    }
+
+                    @Override
+                    public void onSuccess(CityListResponse cityListResponse) {
+                        callback.onSuccess(cityListResponse);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         callback.onError(new NetworkError(e));
-
-                    }
-
-                    @Override
-                    public void onNext(CityListResponse cityListResponse) {
-                        callback.onSuccess(cityListResponse);
-
                     }
                 });
     }
 
-    public interface GetCityListCallback{
+    public interface GetCityListCallback {
         void onSuccess(CityListResponse cityListResponse);
 
         void onError(NetworkError networkError);
